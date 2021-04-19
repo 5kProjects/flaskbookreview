@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+      {% block head %}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet" >
+
+    {%  block title %}
+
+    <title>Hello, worls!</title>
+    {% endblock %}
+    
+
+   
+       <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css">
+    <script src="https://kit.fontawesome.com/e3deaeba31.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,500" rel="stylesheet">
+       {% block styles %}{% endblock %}
+       {% endblock %}
+  </head>
+  <body>
+    
+    <main role="main" class="container">
+
+        {% block content%}
+
+        {% endblock content %}
+    </main>
+
+    <div id="footer">
+         {% block footer %}
+        
+        
+        {% endblock %}
+    </div>
+
+    <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+   
+
+  </body>
+</html>
