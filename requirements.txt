@@ -16,3 +16,5 @@ SQLAlchemy==1.4.7
 tornado==6.1
 Werkzeug==1.0.1
 WTForms==2.3.3
+
+requests~=2.25.1

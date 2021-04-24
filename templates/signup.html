@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{%  block content %}
+
+
+<div class="container ">
+    <div class="row justify-content-md-center col-md-6">
+
+
+        <div id="signup_div_wrapper">
+            <img class="img-fluid mx-auto d-block mb-3"
+                 src="https://themes.getbootstrap.com/wp-content/themes/bootstrap-marketplace/assets/images/elements/bootstrap-logo.svg"
+                 alt="">
+            <h1 class="mb-1 text-center">Sign up</h1>
+            <p class="fs-14 text-gray text-center mb-5">create account to view the best collection of books.</p>
+
+
+            <form method="post" class="register" action="/signup">
+
+                <p class="woocommerce-FormRow woocommerce-FormRow--first form-row form-row-first">
+                    {{ form.username.label(class='form-control-label') }}
+                    {% if form.username.errors %}
+                    {{ form.username(class='form-control is-invalid') }}
+                <div class="invalid-feedback">
+                    {% for error in form.username.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.username(class='woocommerce-Input woocommerce-Input--text input-text form-control') }}
+                {% endif %}
+
+
+
+                <p class="woocommerce-FormRow woocommerce-FormRow--last form-row form-row-last">
+
+
+                    {{ form.email.label(class='form-control-label required') }}
+                    {% if form.email.errors %}
+                    {{ form.email(class='form-control is-invalid') }}
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.email(class='woocommerce-Input woocommerce-Input--text input-text form-control') }}
+                {% endif %}
+
+
+
+                <p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+
+                    {{ form.password.label(class='form-control-label required') }}
+                    {% if form.password.errors %}
+                    {{ form.password(class='form-control is-invalid') }}
+                <div class="invalid-feedback">
+                    {% for error in form.password.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.password(class='woocommerce-Input woocommerce-Input--text input-text form-control' ) }}
+                {% endif %}
+
+
+
+
+                {{ form.confirm.label(class='form-control-label required') }}
+                 {% if form.confirm.errors %}
+                    {{ form.confirm(class='form-control is-invalid') }}
+                <div class="invalid-feedback">
+                    {% for error in form.confirm.errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                {{ form.confirm(class='woocommerce-Input woocommerce-Input--text input-text form-control' ) }}
+                {% endif %}
+
+
+                <div class="invalid-feedback">This field is required</div>
+                </p>
+
+
+                <!-- Spam Trap -->
+                <div style="left: -999em; position: absolute;"><label for="trap">Anti-spam</label><input type="text"
+                                                                                                         name="email_2"
+                                                                                                         id="trap"
+                                                                                                         tabindex="-1"
+                                                                                                         autocomplete="off">
+                </div>
+
+
+                <div class="clear"></div>
+
+                <p class="woocomerce-FormRow form-row">
+
+
+                    {{ form.submit(class="btn btn-brand btn-success btn-block btn-lg mb-4 ") }}
+
+                </p>
+
+
+            </form>
+
+
+        </div>
+    </div>
+</div>
+
+{% endblock%}
