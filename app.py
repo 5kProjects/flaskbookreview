@@ -22,7 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Session(app)
 
 # Set up database
-Env = 'dev'
+Env = 'prod'
 if Env == 'dev':
     engine = create_engine("postgresql://postgres:54123@localhost:5432/books_review")
 else:
