@@ -2,24 +2,35 @@
 
  {%  block content %}
 
-<nav class="navbar navbar-light bg-light">
+<nav class="navbar mb-5 navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand">Navbar</a>
-    <form class="d-flex">
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+    <a class="navbar-brand">Search for the best books</a>
+    <form class="d-flex" action="/" method="post">
+      <input class="form-control me-2" name="search_term" type="search" placeholder="Search" aria-label="Search">
       <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
   </div>
 </nav>
 
-<div class="card" style="width: 18rem;">
-  <div class="card-body">
-    <h5 class="card-title">Card title</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-    <a href="#" class="card-link">Card link</a>
-    <a href="#" class="card-link">Another link</a>
+<div class="row d-flex">
+ {% for book in books %}
+  <div class="card mb-3 ml-2 mr-1 col-md-3 col-sm-5 " style="width: 18rem;">
+    <div class="card-body mx-auto">
+      <h5 class="card-title">{{book.title}}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">{{book.author}}</h6>
+      <p class="card-text">this is the books description</p>
+      <a href="#" class="card-link">{{book.year}}</a>
+      <a href="/book/{{ book.isbn }}" class="card-link">view this book</a>
+    </div>
   </div>
+  {% else %}
+        <div class="card-footer mt-5 text-muted">
+            No books found
+        </div>
+
+
+  {%endfor%}
+
 </div>
 
 

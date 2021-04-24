@@ -1,172 +1,275 @@
 from flask import Flask, render_template, request, jsonify, session, url_for, flash
-# from flask_sqlalchemy import SQLAlchemy
-# import os
-# from flask_session import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from werkzeug.security import generate_password_hash
+
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import redirect
 
 from forms import BookForm, ReviewForm, SignupForm
-
-# from models import Book, Review, User
-from helpers import login_required, open_library_api
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = '7ff61fae7049489'
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Check for environment variable
-# if not os.getenv("DATABASE_URL"):
-#     raise RuntimeError("DATABASE_URL is not set")
-# Configure session to use filesystem
-app.config["SESSION_PERMANENT"] = False
-# app.config["SESSION_TYPE"] = "filesystem"
-# Session(app)
-
-# Set up database
-Env = 'dev'
-if Env == 'dev':
-    engine = create_engine("postgresql://postgres:54123@localhost:5432/books_review")
-else:
-    engine = create_engine(
-        "postgres://dypeyfmtlsqzch:5c0ade7490e67d160ff0c82ac81d6be83da3dc3d21240a367cc349c1c650b978@ec2-54-74-14-109.eu-west-1.compute.amazonaws.com:5432/dbo1skik9jhquo")
-
-db = scoped_session(sessionmaker(bind=engine))
+from helpers import login_required, getApiData
+from models import Book, Review
+from config import db, app
 
 
-@app.route("/")
-def index():
-    return "Project One: TDO"
-
-
-@app.route('/book', methods=['GET', 'POST'])
+@app.route('/createBook', methods=['GET', 'POST'])
 def create_book():
     form = BookForm()
     if request.method == 'POST' and form.validate_on_submit():
-        engine.execute("INSERT INTO books (title, author) VALUES (:title, :author);",
-                       {"title": form.title.data, 'author': form.author.data})
-        engine.commit()
+        db.execute("INSERT INTO books (title, author) VALUES (:title, :author);",
+                   {"title": form.title.data, 'author': form.author.data})
+        db.commit()
         # data = Book(form.title.data, form.author.data, form.isbn.data, form.year.data, )
     return render_template('book.html', form=form)
 
 
-
-
-@app.route("/book/<string:isbn>", methods=["GET"])
-# @login_required
+@app.route("/book/<string:isbn>", methods=["GET", "POST"])
+@login_required
 def book(isbn):
-    form=ReviewForm()
-    book = db.execute("SELECT * FROM books WHERE isbn=:isbn;", {"isbn": isbn}).fetchone()
+    user = session.get("user_id")
+    try:
+        row = db.execute("SELECT * FROM books WHERE isbn=:isbn;", {"isbn": isbn}).fetchone()
+    except Exception as e:
+        return '<div> <a href="/signup">Error No book found Go back</a></div>'
 
-    if book is None:
-        return render_template("book.html", form = form)
+    if row is None:
+        flash("no book found", category="error")
+        return '<div> <a href="/signup">Error No book found Go back</a></div>'
+    print("row here", row)
 
-    reviews = db.execute("SELECT * FROM reviews JOIN users ON reviews.user_id=users.id WHERE book_id=:book_id ", {"book_id": book.id}).fetchall()
+    book = Book(row[0], row[1], row[2], row[3], row[4], reviewCount=row[5] or 0, average=row[6] or 0.0, sum=row[7] or 0)
+    # book = Book(row[0], row[1], row[2], row[3], row[4])
+    print("))))))))))) book", book.__repr__())
+    reviews = []
 
-    current_user_review = db.execute("SELECT * FROM reviews WHERE book_id=:book_id AND user_id=:user_id", {"book_id": book.id, "user_id": session["user_id"]}).fetchone()
-
-    book_extra = open_library_api(isbn)
-
-    if book_extra is not None:
-        book = dict(book)
-        book.update(book_extra)
-    return render_template("book.html", book=book, reviews=reviews, current_user_review=current_user_review, form= form)
-
-
-@app.route("/review/<string:isbn>", methods=["POST"])
-# @login_required
-def review(isbn):
-    """Save a user review."""
-    form = ReviewForm()
-    if request.method == 'POST' and form.validate_on_submit():
-
-        review_rating = int(form.Rating.data)
-
-        book = db.execute("SELECT * FROM books WHERE isbn=:isbn;", {"isbn": isbn}).fetchone()
-
-        if book is None:
-            return flash("ISBN not found on Database", category="error")
-
-        user_review = db.execute("SELECT * FROM reviews WHERE book_id=:book_id AND user_id=:user_id;",
+    # a variable to check whether the user have a review or not
+    newReview = False
+    userHasRev = False
+    userReview = None
+    try:
+        user_review = db.execute("SELECT * FROM reviews WHERE book_id=:book_id AND user_id=:user_id",
                                  {"book_id": book.id, "user_id": session["user_id"]}).fetchone()
+        if (user_review):
+            userReview = Review(user_review[0], user_review[1],
+                                user_review[2], user_review[3],
+                                user_review[4], user_review[4])
+            reviews.append(userReview)
+            # userHasRev = True
+        print("---------->usrRev", user_review)
+        revRow = db.execute("SELECT * FROM reviews WHERE book_id=:book_id ",
+                            {"book_id": book.id}).fetchall()
+        print("***revs", revRow)
+        for r in revRow:
+            rev = Review(r[0], r[1], r[2], r[3], r[4], r[5])
+            reviews.append(rev)
+        print("8888888", reviews)
+    except Exception as e:
+        flash('1 Error:{}'.format(e), category="error")
+        flash('Review error ', category="error")
+        return render_template("book.html", hasReview=userHasRev, reviews=reviews, book=vars(book), user=user,
+                               userReview=userReview)
 
-        if user_review is not None:
-            return flash("You've alreadey submitted a review", category="error")
 
-        db.execute("INSERT INTO reviews (user_id, book_id, rating, review) VALUES (:user_id, :book_id, :rating, :review);",
-                   {"user_id": session["user_id"], "book_id": book.id, "rating": review_rating, "review": form.review.data})
-        db.commit()
-        return redirect(url_for("book", isbn=isbn))
+    print("pooooost")
+    # ============================================= POST METHOD ===================
+    if request.method == 'POST':
+        print("============here")
+        if not userHasRev:
+            starRating = request.form.get('rating')
+            comment = request.form.get('comment')
+            review_rating = int(starRating)
+
+            usrName = ""
+            userId = 0
+            try:
+                userId= session["user_id"]
+                usrName =session["usrname"]
+            except Exception as e:
+                print(e)
+                usrName=""
 
 
-@app.route("/search", methods=["GET", "POST"])
+
+
+            try:
+                db.execute(
+                    "INSERT INTO reviews (user_id, book_id, rating, review) VALUES (:user_id, :book_id, :rating, :review);",
+                    {"user_id": userId, "book_id": book.id, "rating": review_rating, "review": comment})
+
+
+
+                newCount = book.review_count + 1
+                newSum = book.ratings_sum + review_rating
+                newAverage = newSum / newCount
+
+                db.execute(
+                    "UPDATE books SET review_count=:count, ratings_sum=:sum, average_reviews=:average WHERE id=:isbn",
+                    { "count": newCount, "sum": newSum, "average": newAverage, "isbn": book.isbn})
+
+                db.commit()
+                print("iiiiiiiiiiiiiiiiii")
+
+                revew=Review(0, session["user_id"], book.id, review_rating, comment, usrName)
+                reviews.insert(0,revew)
+
+                book.review_count = newCount
+                book.ratings_sum = newSum
+                book.average_reviews = newAverage
+
+                flash("review success", category="success")
+                userHasRev = True
+                newReview = True
+
+                print("------------here2")
+            except Exception as e:
+                flash('Review not added ,   Error:{}, '.format(e), category="error")
+                return render_template("book.html", user=user, book=vars(book), reviews=reviews, hasReview=userHasRev,
+
+                                       isbn=book.isbn, userReview=userReview)
+        if userHasRev and (not newReview):
+            flash("review already exist", category="error")
+
+    api_data = {}
+    # api_data = getApiData(isbn)
+    # if not api_data:
+    #     api_data = {'subjects': ['subjects cannot be found']}
+    if api_data is not None:
+        book = vars(book)
+        book.update(api_data)
+    return render_template("book.html", book=book, reviews=reviews, hasReview=userHasRev, isbn=book["isbn"],
+                            user=user, userReview=userReview)
+
+
+@app.route("/", methods=["GET", "POST"])
 # @login_required
 def search():
+    books = []
+    user = session.get("user_id")
     if request.method == "GET":
-        return redirect(url_for("index"))
-    term = request.form.get("value_searched", None)
+
+        try:
+            books = db.execute("SELECT * FROM books LIMIT 20")
+
+        except Exception as e:
+            flash("some thing wrong, Error:{}".format(e), category="error")
+        return render_template("index.html", books=books, user=user)
+    term = request.form.get("search_term", None)
 
     if term == None or term == "":
         flash("You must provide a term to search")
-        return render_template("search.html")
-
+        return render_template("index.html", books=books, user=user)
     term = "%{}%".format(term)
     books = db.execute("SELECT * FROM books WHERE isbn LIKE :term OR title LIKE :term OR author LIKE :term;",
                        {"term": term}).fetchall()
     if not len(books):
         flash("There is no books")
-    return render_template("search.html", books=books)
-
+    return render_template("index.html", books=books, user=user)
 
 
 @app.route("/api/book/<string:isbn>", methods=['GET', 'POST'])
 def api_book(isbn):
     try:
-        books_curs = db.execute("SELECT * FROM books WHERE isbn=:isbn;", {"isbn": isbn}).fetchone()
+        curs = db.execute("SELECT * FROM books WHERE isbn=:isbn;", {"isbn": isbn}).fetchone()
         # columns = [column[0] for column in books.discription]
-        book_col = books_curs.fetchone()
     except():
         return jsonify({"error": "some error"}), 404
-    print(books_curs)
-    print(book_col)
-    if book_col is None:
+
+    if curs is None:
         return jsonify({"error": "no book"}), 404
+    book = Book(curs[0], curs[1], curs[2], curs[3], curs[4], )
+    print("----------------", vars(book))
+    dictBook = vars(book)
+    return jsonify(
+        {'id': book.id, 'author': book.author, 'title': book.title, "isbn": book.isbn, "releaseYear": book.year, "rating":book.average_reviews, "reviewCount":book.review_count}
 
-    results = []
-    for row in book_col:
-        results.append([x for x in row])  # or simply data.append(list(row))
-
-    return {'results': results}
+    )
 
 
 @app.route("/signup", methods=["GET", "POST"])
 def register():
     """Register user"""
-    form = SignupForm()
-    if request.method == "POST" and form.validate_on_submit():
-        print("post")
+    # form = SignupForm()
+    if request.method == "POST":
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm = request.form.get('confirm')
 
-        # Query database for username to check that not exist
-        user = db.execute("SELECT * FROM users WHERE username = :username;",
-                          {"username": form.username.data}).fetchall()
-        if user:
-            print("user exist")
-            return flash("username already taken", category='error')
-        if form.password.data != form.confirm.data:
-            print("pwd dont match")
-            return flash("confirmation and password don't match", category='error')
-        else:
-            row = db.execute("INSERT INTO users (username, password) VALUES (:username, :password);",
-                             {"username": form.username.data, "password": generate_password_hash(form.password.data)})
-            print(row)
+        bool, message = verifySignupFields(username, email, password, confirm)
+        if not bool:
+            flash(message, category='error')
+            return render_template('signup.html', error=message)
+
+        try:
+            db.execute("INSERT INTO users (username, email, password) VALUES (:username,:email, :password);",
+                       {"username": username, "email": email,
+                        "password": generate_password_hash(password, 'sha256')})
             db.commit()
-            # session["user_id"] = row[0]["id"]
-            return redirect("/")
+        except Exception as e:
+            return render_template('signup.html', error="Error:{}".format(e))
+        try:
+            user = db.execute("SELECT id FROM users WHERE username = :username;",
+                              {"username": username}).fetchone()
+
+        except Exception as e:
+            return render_template('signup.html', error="Error:{}".format(e))
+        session['user_id'] = user[0]["id"]
+        session['username'] = user[0]["username"]
+        flash("userCreated", category='success')
+        return redirect("/")
     else:
-        print("get method")
-        return render_template("signup.html", form=form)
+
+        return render_template("signup.html", )
+
+
+def verifySignupFields(name, email, password, confirm):
+    message = ""
+    if password != confirm:
+        message = "confirmation and password don't match"
+        return [False, message]
+        # Query database for username to check that not exist
+    user = db.execute("SELECT * FROM users WHERE username = :username;",
+                      {"username": name}).fetchone()
+    if user:
+        print("======>>>> user exist")
+        message = "username already taken"
+        return [False, message]
+    return [True, message]
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+    session.clear()
+    if request.method == "POST":
+        username = request.form.get('username')
+        password = request.form.get('password')
+        print("==========>", username, password)
+
+        try:
+            rows = db.execute("SELECT * FROM users WHERE username = :username",
+                              {"username": username}).fetchall()
+
+            if len(rows) > 0 and check_password_hash(rows[0]["password"], password):
+                flash('Logged in successfully!', category='success')
+                session["user_id"] = rows[0]["id"]
+                session["username"] = rows[0]["username"]
+
+                return redirect("/")
+            else:
+                flash("invalid username or password", category='error')
+                return render_template("login.html")
+        except Exception as e:
+            flash("Error:{}".format(e), category='error')
+            return render_template("login.html")
+
+    else:
+        return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    """Logout"""
+    session.clear()
+    flash('Logged out successfully!', category='success')
+    return redirect("/")
 
 
 if __name__ == '__main__':

@@ -1,36 +1,108 @@
 {% extends "base.html" %}
 
- {%  block content %}
+{%  block content %}
 
- {% for element in books %}
-    <h4> {{ element }} </h4>
-    {% else %}
-    <h2> Empty Collection </h2>
-{% endfor %}
+<!-- ----------==========    Book             -->
+<div class="container mt-6">
+    <div class="row  justify-content-md-center mt-5">
 
-
-    {{ form.csrf_token }}
-        <div class="form-group">
-            {{ form.title.label(class='form-control-label') }}
-            {% if form.title.errors %}
-            {{ form.title(class='form-control is-invalid') }}
-                <div class="invalid-feedback">
-                    {% for error in form.title.errors %}
-                    <span>{{ error }}</span>
-                    {% endfor %}
+        <div class="col-md-10 mt-6">
+            <div class="card text-center">
+                <div class="card-header">
+                    {{book.isbn}}
                 </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{book.title}}</h5>
+                    <p class="card-text">this is the description of the book</p>
+                    <footer class="blockquote-footer">{{book.author}}----- <cite
+                            title="Source Title">{{book.year}}</cite></footer>
+                </div>
+                {%if book.average_rating%}
+                <div class="card-footer text-muted">
+                    goodreads rating
+                    {{book.average_rating}} <i class="fa-fa-star"></i>
+                    goodreads count{{book.reviews_count}}
+                </div>
+                {%endif%}
+
+                <div class="card-footer text-muted">
+                    users reviews
+                    {{book.average_reviews}} <i class="fa-fa-star"></i>
+                    total reviews
+                    {{book.review_count}}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========== bottom    -->
+<div class="row  justify-content-md-center card-footer mt-5 text-muted">
+
+    <!--    ============ Reviews =======       -->
+    <div class="col-md-5 card-footer mr-5 text-muted">
+
+
+        <ol class="list-group list-group-numbered ">
+            {% for review in reviews %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <span class="badge success pill">{{ review.username }}</span>
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">{{ review.user }}</div>
+                    {{ review.review }}
+                </div>
+                <span class="badge bg-primary rounded-pill">{{ review.rating }}</span>
+            </li>
+
             {% else %}
-                {{ form.title(class='form-control') }}
-            {% endif %}
+        </ol>
+
+        <div class="card-footer mt-5 text-muted">
+            No reviews yet
         </div>
-        <div class="form-group">
-            {{ form.author.label(class='form-control-label') }}
-            {{ form.author(class='form-control') }}
-        </div>
-        <div class="form-group">
-            {{ form.description.label(class='form-control-label') }}
-            {{ form.description(class='form-control') }}
-        </div>
-        {{ form.submit }}    
-    </form>
+        <h2></h2>
+        {% endfor %}
+    </div>
+
+
+    <!--     ============= Post review ===========     -->
+    <div class="col-md-5">
+        <form name="" id="" action="{{ url_for('book', isbn=isbn) }}" method="post">
+            <input type="hidden" name="bookId" value={{book.isbn}}>
+
+            <div class="mb-3">
+                <label for="exampleFormControlTextarea1" class="form-label">Review this book</label>
+                <textarea name="comment" class="form-control" id="exampleFormControlTextarea1" rows="3"
+                          {% if hasReview %}
+                          disabled
+                          {%endif%}
+                ></textarea>
+            </div>
+            <label for="customRange2" class="form-label">select your rating</label>
+
+            <br>
+            <div class="row">
+
+                <input type="range" name="rating" class="form-range col-md-6 col-lg-6" min="0" max="5" id="customRange2"
+                       {% if hasReview %}
+                       disabled>
+                {%endif%}>
+                <output class="col-md-3" for="rating" onforminput="value = rating.valueAsNumber;"></output>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit"
+                    {% if hasReview %}
+                    disabled
+                    {%endif%}>
+                submit
+            </button>
+
+
+        </form>
+    </div>
+
+
+</div>
+
 {% endblock %}

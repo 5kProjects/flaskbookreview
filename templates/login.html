@@ -5,33 +5,42 @@
 <div>
 
     <div class="row justify-content-md-center">
-        <div class="container container--mini"><img class="img-fluid mx-auto d-block mb-5"
-                                                    src="https://themes.getbootstrap.com/wp-content/themes/bootstrap-marketplace/assets/images/elements/bootstrap-logo.svg"
+        <div class="container container--mini">
+            <img class=" gap-3 img-fluid mx-auto col-md-4 d-block mt-5"
+                                                    src="../static/images/login.jpg"
                                                     alt="">
-            <form name="loginform" id="loginform" action="https://themes.getbootstrap.com/wp-login.php" method="post">
+             {% if message %}
+            <p class="message">{{ message | safe }}</p>
+                {% endif %}
+
+             <div class="row">
+                <div class="col-md-6 mx-auto">
+            <form name="loginform" id="loginform" action="/login" method="post">
+
 
                 <div class="form-group">
-                    <label for="user_login">Email</label>
-                    <input type="text" name="log" id="user_login" class="form-control" value="" size="20">
+                    <label for="user_login">User Name</label>
+                    <input type="text" name="username" id="user_login" class="form-control" value="" size="20">
                 </div>
                 <div class="form-group">
                     <label for="user_pass">Password</label>
-                    <a class="form-sublink" href="https://themes.getbootstrap.com/my-account/lost-password/">Forgot
-                        password?</a>
-                    <input type="password" name="pwd" id="user_pass" class="form-control" value="" size="20">
+
+                    <input type="password" name="password" id="user_pass" class="form-control" value="" size="20">
                 </div>
 
-                <p class="login-remember"><label><input name="rememberme" type="checkbox" id="rememberme"
+                <p class="login-remember"><label><input name="remember" type="checkbox" id="rememberme"
                                                         value="forever"> Remember Me</label></p>
                 <div class="form-group">
-                    <input type="submit" name="wp-submit" id="wp-submit" class="btn btn-brand btn-block mb-4"
+                    <input type="submit" name="wp-submit" id="wp-submit" class="btn btn-brand md-3 btn-info btn-block mb-2"
                            value="Sign In">
-                    <input type="hidden" name="redirect_to" value="https://themes.getbootstrap.com/my-account/">
                 </div>
 
             </form>
+                </div>
+             </div>
+
             <p class="small text-center text-gray-soft">Don't have an account yet? <a
-                    href="https://themes.getbootstrap.com/my-account/">Sign up</a></p>
+                    href="/signup">Sign up</a></p>
         </div>
     </div>
 
