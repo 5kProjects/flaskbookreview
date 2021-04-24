@@ -79,6 +79,4 @@ def api_book():
 
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        # main()/
+    app.run(debug=True)
