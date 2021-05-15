@@ -12,9 +12,9 @@
 ###  description
 
 in the index page books are listed but in order to view the books a user must login,
-but for convinences sace users are allowed to search with out logging in
+but for convinences sake users are allowed to search with out logging in
 
-after a user logs in he/she can see the books details & als review hhe book once
+after a user logs in he/she can see the books details & also review the book only once
 
 > 
 > 
