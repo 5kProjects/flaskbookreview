@@ -1,3 +1,5 @@
+import os
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -21,10 +23,9 @@ app.config["SESSION_PERMANENT"] = False
 
 Env = 'dev'
 if Env == 'dev':
-    engine = create_engine("postgresql://postgres:54123@localhost:5432/books_review")
+    engine = create_engine(os.getenv('LOCAL_POSTGRES_KEY'))
 else:
-    engine = create_engine(
-        "postgres://dypeyfmtlsqzch:5c0ade7490e67d160ff0c82ac81d6be83da3dc3d21240a367cc349c1c650b978@ec2-54-74-14-109.eu-west-1.compute.amazonaws.com:5432/dbo1skik9jhquo")
+    engine = create_engine(os.getenv('HEROKU_POSTGRES_KEY'))
 
 db = scoped_session(sessionmaker(bind=engine))
 
