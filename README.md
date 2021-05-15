@@ -105,9 +105,9 @@ where KEY is your API key, will give you the review and rating data for the book
 ```
 Note that work_ratings_count here is the number of ratings that this particular book has received, and average_rating is the book’s average score out of 5.
 
-# Requirements
+# Functionalities
 
-Alright, it’s time to actually build your web application! Here are the requirements:
+ Here are the requirements of this application:
 
 1. **Registration**: Users should be able to register for your website, providing (at minimum) a username and password.
 
@@ -115,17 +115,17 @@ Alright, it’s time to actually build your web application! Here are the requir
 
 3. **Logout**: Logged in users should be able to log out of the site.
 
-4. **Import**: Provided for you in this project is a file called books.csv, which is a spreadsheet in CSV format of 5000 different books. Each one has an ISBN number, a title, an author, and a publication year. In a Python file called import.py separate from your web application, write a program that will take the books and import them into your PostgreSQL database. You will first need to decide what table(s) to create, what columns those tables should have, and how they should relate to one another. Run this program by running python3 import.py to import the books into your database, and submit this program with the rest of your project code.
+4. **Import**: Provided for you in this project is a file called books.csv, which is a spreadsheet in CSV format of 5000 different books. Each one has an ISBN number, a title, an author, and a publication year. In a Python file called import.py separate from the web application, there is a program that will take the books and import them into your PostgreSQL database. You will first need to create, the tables . Run this program by running python3 import.py to import the books into your database, and submit this program with the rest of your project code.
 
-5. **Search**: Once a user has logged in, they should be taken to a page where they can search for a book. Users should be able to type in the ISBN number of a book, the title of a book, or the author of a book. After performing the search, your website should display a list of possible matching results, or some sort of message if there were no matches. If the user typed in only part of a title, ISBN, or author name, your search page should find matches for those as well!
+5. **Search**: in the default page you are taken to a page where you can search for a book. you can type in the ISBN number of a book, the title of a book, or the author of a book. After performing the search, the website displays a list of possible matching results, or some sort of message if there were no matches. If the user typed in only part of a title, ISBN, or author name, the search page find matches for those as well!
 
-6. **Book Page**: When users click on a book from the results of the search page, they should be taken to a book page, with details about the book: its title, author, publication year, ISBN number, and any reviews that users have left for the book on your website.
+6. **Book Page**: When users click on a book from the results of the search page, they should be taken to a book page, with details about the book: its title, author, publication year, ISBN number, and any reviews that users have left for the book on the website.
 
-7. **Review Submission**: On the book page, users should be able to submit a review: consisting of a rating on a scale of 1 to 5, as well as a text component to the review where the user can write their opinion about a book. Users should not be able to submit multiple reviews for the same book.
+7. **Review Submission**: On the book page, users are able to submit a review: consisting of a rating on a scale of 1 to 5, as well as a text component to the review where the user can write their opinion about a book. Users can not submit multiple reviews for the same book.
 
-8. **Goodreads Review Data**: On your book page, you should also display (if available) the average rating and number of ratings the work has received from Goodreads.
+8. **Goodreads Review Data**: On the book page,  the average rating and number of ratings the work has received from Goodreads is displayed (if available).
 
-9. **API Access**: If users make a GET request to your website’s /api/<isbn> route, where <isbn> is an ISBN number, your website should return a JSON response containing the book’s title, author, publication date, ISBN number, review count, and average score. The resulting JSON should follow the format:
+9. **API Access**: If users make a GET request to your website’s /api/<isbn> route, where <isbn> is an ISBN number, the website returns a JSON response containing the book’s title, author, publication date, ISBN number, review count, and average score. The resulting JSON should is in the format:
 
 ```json
     {
@@ -138,20 +138,21 @@ Alright, it’s time to actually build your web application! Here are the requir
     }
 ```
 
-If the requested ISBN number isn’t in your database, your website should return a 404 error.
+If the requested ISBN number isn’t in not in the database, the website returns a 404 error.
 
-1. You should be using raw SQL commands (as via SQLAlchemy’s execute method) in order to make database queries. 
-2. You should not use the SQLAlchemy ORM (if familiar with it) for this project.
-3. In README.md, include a short writeup describing your project, what’s contained in each file, and (optionally) any other additional information the staff should know about your project.
-4. If you’ve added any Python packages that need to be installed in order to run your web application, be sure to add them to requirements.txt!
+1. raw SQL commands is used (as via SQLAlchemy’s execute method) in order to make database queries. 
+2.SQLAlchemy is not used in this version
+3. The README.md, include a writeup describing the project,
+4.all Python packages that need to be installed in order to run the web application, are added in the requirements.txt!
 
-Beyond these requirements, the design, look, and feel of the website are up to you! You’re also welcome to add additional features to your website, so long as you meet the requirements laid out in the above specification!
+ the design, look, and feel of the website can be be changed in any way! And   additional features can be added to the website, 
 
-# Hints
+# other informations
 
-    1. At minimum, you’ll probably want at least one table to keep track of users, one table to keep track of books, and one table to keep track of reviews. But you’re not limited to just these tables, if you think others would be helpful!
+    1. this projects database includes one table to keep track of users, one table to keep track of books, and one table to keep track of reviews. 
 
-    2. In terms of how to “log a user in,” recall that you can store information inside of the session, which can store different values for different users. In particular, if each user has an id, then you could store that id in the session (e.g., in session["user_id"]) to keep track of which user is currently logged in.
+    2.  TO “log a user in,the information is stored inside a session, which can store different values for different users. 
+         In particular, each user has an id, and  that is the id stored in the session (e.g., in session["user_id"]) to keep track of which user is currently logged in.
 
 ## References
 <a id="1">[1]</a> 
